@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { Search, Plus, Edit, Trash2, Copy, Heart, HeartOff, Code } from "lucide-react"
+import { highlightCode } from "@/lib/syntax-highlight"
 
 interface Snippet {
   id: string
@@ -381,7 +382,10 @@ export default function CodeSnippetSaver() {
 
                   <div className="bg-muted p-3 rounded-md">
                     <pre className="text-sm overflow-x-auto">
-                      <code>{snippet.code.substring(0, 200)}...</code>
+                      <code>
+                        {highlightCode(snippet.code.substring(0, 200), snippet.language)}
+                        {snippet.code.length > 200 && "..."}
+                      </code>
                     </pre>
                   </div>
 
