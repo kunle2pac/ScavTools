@@ -5,6 +5,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
+
+function formatDuration(ms: number): string {
+  const totalSeconds = Math.floor(Math.abs(ms) / 1000)
+  const days = Math.floor(totalSeconds / 86400)
+  const hours = Math.floor((totalSeconds % 86400) / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  const parts: string[] = []
+  if (days > 0) parts.push(`${days}d`)
+  if (hours > 0) parts.push(`${hours}h`)
+  if (minutes > 0) parts.push(`${minutes}m`)
+  if (parts.length === 0) parts.push(`${seconds}s`)
+
+  return parts.join(" ")
+}
+
+function expiryStatus(expSeconds: number): { expired: boolean; label: string } {
+  const diffMs = expSeconds * 1000 - Date.now()
+  if (diffMs <= 0) {
+    return { expired: true, label: `Expired ${formatDuration(diffMs)} ago` }
+  }
+  return { expired: false, label: `Expires in ${formatDuration(diffMs)}` }
+}
 
 export function JwtDecoder() {
   const [jwt, setJwt] = useState("")
@@ -90,7 +115,13 @@ export function JwtDecoder() {
                 <pre className="text-sm">{decodedPayload ? formatJson(decodedPayload) : "No payload data"}</pre>
               </div>
               {decodedPayload?.exp && (
-                <div className="mt-4 text-sm">
+                <div className="mt-4 text-sm space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant={expiryStatus(decodedPayload.exp).expired ? "destructive" : "default"}>
+                      {expiryStatus(decodedPayload.exp).expired ? "Expired" : "Valid"}
+                    </Badge>
+                    <span>{expiryStatus(decodedPayload.exp).label}</span>
+                  </div>
                   <p>
                     <strong>Expires:</strong> {new Date(decodedPayload.exp * 1000).toLocaleString()}
                   </p>
