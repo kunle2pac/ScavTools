@@ -6,6 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Slider } from "@/components/ui/slider"
+
+const MIN_AFFIX_LENGTH = 2
+const MAX_AFFIX_LENGTH = 20
 
 // StarkNet addresses are 0x-prefixed hex felts: up to 64 hex digits (252 bits),
 // and unlike Ethereum addresses they are not required to be exactly 40 digits
@@ -31,11 +35,20 @@ function validateStarknetAddress(value: string): string | null {
 
 export function AddressShortener() {
   const [address, setAddress] = useState("")
-  const [shortAddress, setShortAddress] = useState("")
+  const [showResult, setShowResult] = useState(false)
   const [error, setError] = useState("")
   const [copied, setCopied] = useState(false)
+  const [prefixLength, setPrefixLength] = useState(6)
+  const [suffixLength, setSuffixLength] = useState(4)
 
   const isValid = address.length > 0 && validateStarknetAddress(address) === null
+
+  // Derived live from address + prefix/suffix length so the output updates
+  // immediately as the sliders move, without needing to re-click "Shorten".
+  const shortAddress =
+    showResult && isValid
+      ? `${address.substring(0, prefixLength)}...${address.substring(address.length - suffixLength)}`
+      : ""
 
   const shortenAddress = () => {
     try {
@@ -46,12 +59,10 @@ export function AddressShortener() {
         throw new Error(validationError)
       }
 
-      // Create shortened version (first 6 and last 4 characters)
-      const shortened = `${address.substring(0, 6)}...${address.substring(address.length - 4)}`
-      setShortAddress(shortened)
+      setShowResult(true)
     } catch (err) {
       setError((err as Error).message)
-      setShortAddress("")
+      setShowResult(false)
     }
   }
 
@@ -77,7 +88,7 @@ export function AddressShortener() {
             onChange={(e) => {
               setAddress(e.target.value)
               setError("")
-              setShortAddress("")
+              setShowResult(false)
             }}
             className="font-mono"
           />
@@ -85,6 +96,29 @@ export function AddressShortener() {
             <p className="text-sm text-destructive">{validateStarknetAddress(address)}</p>
           )}
           {error && <p className="text-sm text-destructive">{error}</p>}
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Prefix length: {prefixLength}</Label>
+            <Slider
+              value={[prefixLength]}
+              min={MIN_AFFIX_LENGTH}
+              max={MAX_AFFIX_LENGTH}
+              step={1}
+              onValueChange={(value) => setPrefixLength(value[0])}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Suffix length: {suffixLength}</Label>
+            <Slider
+              value={[suffixLength]}
+              min={MIN_AFFIX_LENGTH}
+              max={MAX_AFFIX_LENGTH}
+              step={1}
+              onValueChange={(value) => setSuffixLength(value[0])}
+            />
+          </div>
         </div>
 
         <Button onClick={shortenAddress} disabled={!isValid}>
