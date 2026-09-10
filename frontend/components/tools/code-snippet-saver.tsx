@@ -74,6 +74,7 @@ export default function CodeSnippetSaver() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [showFavorites, setShowFavorites] = useState(false)
   const [editingSnippet, setEditingSnippet] = useState<Snippet | null>(null)
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null)
 
   // Form state
   const [formData, setFormData] = useState({
@@ -170,8 +171,16 @@ export default function CodeSnippetSaver() {
     setActiveTab("editor")
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this snippet?")) return
+  const requestDelete = (id: string) => {
+    setConfirmingDeleteId(id)
+  }
+
+  const cancelDelete = () => {
+    setConfirmingDeleteId(null)
+  }
+
+  const confirmDelete = async (id: string) => {
+    setConfirmingDeleteId(null)
 
     try {
       const response = await fetch(`/api/snippets/${id}`, {
@@ -347,21 +356,33 @@ export default function CodeSnippetSaver() {
                       <CardTitle className="text-lg">{snippet.title}</CardTitle>
                       {snippet.description && <CardDescription className="mt-1">{snippet.description}</CardDescription>}
                     </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="sm" variant="ghost" onClick={() => toggleFavorite(snippet.id)}>
-                        {snippet.isFavorite ? (
-                          <Heart className="h-4 w-4 fill-red-500 text-red-500" />
-                        ) : (
-                          <HeartOff className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => handleEdit(snippet)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => handleDelete(snippet.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    {confirmingDeleteId === snippet.id ? (
+                      <div className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-2 py-1">
+                        <span className="text-xs text-destructive">Delete?</span>
+                        <Button size="sm" variant="destructive" onClick={() => confirmDelete(snippet.id)}>
+                          Delete
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={cancelDelete}>
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button size="sm" variant="ghost" onClick={() => toggleFavorite(snippet.id)}>
+                          {snippet.isFavorite ? (
+                            <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+                          ) : (
+                            <HeartOff className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleEdit(snippet)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => requestDelete(snippet.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
