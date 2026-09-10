@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { Copy, Check } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
@@ -36,6 +37,8 @@ export function JwtDecoder() {
   const [decodedHeader, setDecodedHeader] = useState<any>(null)
   const [decodedPayload, setDecodedPayload] = useState<any>(null)
   const [error, setError] = useState("")
+  const [copiedHeader, setCopiedHeader] = useState(false)
+  const [copiedPayload, setCopiedPayload] = useState(false)
 
   const decodeJwt = () => {
     try {
@@ -83,6 +86,20 @@ export function JwtDecoder() {
     return JSON.stringify(obj, null, 2)
   }
 
+  const copyHeader = () => {
+    if (!decodedHeader) return
+    navigator.clipboard.writeText(formatJson(decodedHeader))
+    setCopiedHeader(true)
+    setTimeout(() => setCopiedHeader(false), 2000)
+  }
+
+  const copyPayload = () => {
+    if (!decodedPayload) return
+    navigator.clipboard.writeText(formatJson(decodedPayload))
+    setCopiedPayload(true)
+    setTimeout(() => setCopiedPayload(false), 2000)
+  }
+
   return (
     <Card className="mx-auto max-w-3xl">
       <CardHeader>
@@ -111,8 +128,19 @@ export function JwtDecoder() {
             </TabsList>
 
             <TabsContent value="payload">
-              <div className="bg-muted p-4 rounded-md overflow-x-auto">
+              <div className="relative bg-muted p-4 rounded-md overflow-x-auto">
                 <pre className="text-sm">{decodedPayload ? formatJson(decodedPayload) : "No payload data"}</pre>
+                {decodedPayload && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2"
+                    onClick={copyPayload}
+                  >
+                    {copiedPayload ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    <span className="sr-only">Copy payload</span>
+                  </Button>
+                )}
               </div>
               {decodedPayload?.exp && (
                 <div className="mt-4 text-sm space-y-2">
@@ -135,8 +163,19 @@ export function JwtDecoder() {
             </TabsContent>
 
             <TabsContent value="header">
-              <div className="bg-muted p-4 rounded-md overflow-x-auto">
+              <div className="relative bg-muted p-4 rounded-md overflow-x-auto">
                 <pre className="text-sm">{decodedHeader ? formatJson(decodedHeader) : "No header data"}</pre>
+                {decodedHeader && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2"
+                    onClick={copyHeader}
+                  >
+                    {copiedHeader ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    <span className="sr-only">Copy header</span>
+                  </Button>
+                )}
               </div>
             </TabsContent>
           </Tabs>
