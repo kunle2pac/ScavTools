@@ -1,6 +1,6 @@
 # ScavTools
 
-A developer utilities platform built for Web3 and StarkNet developers. ScavTools bundles a collection of everyday developer tools into a single, clean interface — from JSON formatting and JWT decoding to StarkNet address shortening and PDF generation.
+A developer utilities platform built for Web3 developers. ScavTools bundles a collection of everyday developer tools into a single, clean interface — from JSON formatting and JWT decoding to address shortening and PDF generation.
 
 ## What It Does
 
@@ -10,7 +10,7 @@ ScavTools gives developers quick access to tools they reach for repeatedly, with
 
 | Tool | Description |
 |------|-------------|
-| Address Shortener | Shortens StarkNet wallet addresses for easier sharing |
+| Address Shortener | Shortens wallet addresses for easier sharing |
 | Base64 Encoder / Decoder | Encode and decode Base64 strings |
 | Box Shadow Generator | Visually build CSS box shadow values |
 | Code Snippet Saver | Save and retrieve reusable code snippets |
