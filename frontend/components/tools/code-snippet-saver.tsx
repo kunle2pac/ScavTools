@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { Search, Plus, Edit, Trash2, Copy, Heart, HeartOff, Code } from "lucide-react"
@@ -70,6 +71,7 @@ export default function CodeSnippetSaver() {
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("library")
   const [searchTerm, setSearchTerm] = useState("")
+  const debouncedSearchTerm = useDebouncedValue(searchTerm, 300)
   const [selectedLanguage, setSelectedLanguage] = useState("")
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [showFavorites, setShowFavorites] = useState(false)
@@ -89,13 +91,13 @@ export default function CodeSnippetSaver() {
   useEffect(() => {
     fetchSnippets()
     fetchTags()
-  }, [searchTerm, selectedLanguage, selectedTags, showFavorites])
+  }, [debouncedSearchTerm, selectedLanguage, selectedTags, showFavorites])
 
   const fetchSnippets = async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
-      if (searchTerm) params.append("search", searchTerm)
+      if (debouncedSearchTerm) params.append("search", debouncedSearchTerm)
       if (selectedLanguage) params.append("language", selectedLanguage)
       if (selectedTags.length > 0) params.append("tags", selectedTags.join(","))
       if (showFavorites) params.append("isFavorite", "true")
